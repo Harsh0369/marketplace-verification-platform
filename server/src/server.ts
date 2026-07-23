@@ -1,6 +1,7 @@
 import app from './app';
 import { sequelize } from './db/database';
 import './db/models'; // Initialize models and associations
+import { azureBlobProvider } from './providers/azure-blob.provider';
 
 const PORT = process.env.PORT || 5000;
 
@@ -13,6 +14,9 @@ async function startServer() {
     // Sync models (In production, use migrations instead of sync)
     await sequelize.sync({ alter: true });
     console.log('✅ Database synchronized.');
+
+    // Initialize Azure Blob Container
+    await azureBlobProvider.initialize();
 
     app.listen(PORT, () => {
       console.log(`🚀 ListingShield API running on http://localhost:${PORT}`);
