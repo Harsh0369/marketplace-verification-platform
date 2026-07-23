@@ -13,10 +13,12 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-import productRoutes from './routes/product.routes';
+// No product routes yet
+import authRoutes from './routes/auth.routes';
 
 // Routes
-app.use('/products', productRoutes);
+app.use('/auth', authRoutes);
+// No product routes mounted yet
 
 // Health Check
 app.get('/health', (req: Request, res: Response) => {
