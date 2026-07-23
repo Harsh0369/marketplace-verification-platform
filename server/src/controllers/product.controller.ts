@@ -2,6 +2,7 @@ import type { Request, Response } from 'express';
 import { productService } from '../services/product.service';
 import { createProductSchema, updateProductSchema } from '../types/product.types';
 import { azureBlobProvider } from '../providers/azure-blob.provider';
+import { verificationEngine } from '../verification/verification-engine';
 import { sendSuccess } from '../utils/response.util';
 import { handleError, AppError } from '../utils/error.util';
 
@@ -94,9 +95,18 @@ export class ProductController {
       // Save to database
       const productImage = await productService.addImageToProduct(id, imageUrl);
 
-      // Note: Verification Engine triggers will be added here in Phase 2
+      // Trigger Verification Engine
+      const verificationDecision = await verificationEngine.executeVerification({
+        productId: id,
+        userId: userId,
+        imageUrl,
+        imageBuffer: file.buffer
+      });
 
-      return sendSuccess(res, 201, 'Image uploaded successfully', productImage);
+      return sendSuccess(res, 201, 'Image uploaded and verification completed', {
+        image: productImage,
+        verification: verificationDecision
+      });
     } catch (error: any) {
       return handleError(res, error);
     }
