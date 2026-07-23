@@ -1,7 +1,7 @@
 import type { Request, Response } from 'express';
 import { productService } from '../services/product.service';
 import { createProductSchema, updateProductSchema } from '../types/product.types';
-import { azureBlobProvider } from '../providers/azure-blob.provider';
+import { cloudinaryProvider } from '../providers/cloudinary.provider';
 import { verificationEngine } from '../verification/verification-engine';
 import { sendSuccess } from '../utils/response.util';
 import { handleError, AppError } from '../utils/error.util';
@@ -89,8 +89,8 @@ export class ProductController {
         throw new AppError('No image uploaded', 400);
       }
 
-      // Upload to Azure
-      const imageUrl = await azureBlobProvider.uploadImage(file.buffer, file.originalname, file.mimetype);
+      // Upload to Cloudinary
+      const imageUrl = await cloudinaryProvider.uploadImage(file.buffer);
 
       // Save to database
       const productImage = await productService.addImageToProduct(id, imageUrl);

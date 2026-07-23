@@ -15,6 +15,7 @@ Unlike traditional moderation systems that rely heavily on paid AI APIs or manua
 The platform verifies uploaded product images and metadata to ensure that listings comply with marketplace policies while maintaining extremely low inference cost and latency.
 
 ### Goals
+
 - Verify uploaded product images
 - Detect contact information inside images
 - Reject non-product images
