@@ -23,7 +23,7 @@ class CloudinaryProvider {
 
       const uploadStream = cloudinary.uploader.upload_stream(
         uploadOptions,
-        (error, result: UploadApiResponse | undefined) => {
+        (error: any, result: UploadApiResponse | undefined) => {
           if (error) {
             console.error('Cloudinary upload error:', error);
             return reject(new AppError('Failed to upload image to Cloudinary', 500));
