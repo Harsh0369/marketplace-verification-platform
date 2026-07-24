@@ -1,34 +1,20 @@
-# ---- Build Stage (Native Speed) ----
-ARG BUILDPLATFORM=linux/amd64
-FROM --platform=$BUILDPLATFORM node:22-alpine AS builder
-WORKDIR /app
-
-# Install ALL dependencies to compile TS
-COPY package.json package-lock.json ./
-RUN npm ci
-
-# Copy source and compile TypeScript natively
-COPY tsconfig.json ./
-COPY src ./src
-RUN npm run build
-
-# ---- Production Stage ----
-FROM node:22-alpine AS runner
+FROM node:22-alpine
 WORKDIR /app
 ENV NODE_ENV=production
 
 # Tini for proper SIGTERM handling on scaling down/restarts
 RUN apk add --no-cache tini
 
-# Install ONLY production dependencies (Much faster and lighter)
+# Install ALL dependencies (including devDependencies like tsx)
 COPY package.json package-lock.json ./
-RUN npm ci --omit=dev
+RUN npm ci
 
-# Copy compiled artifacts from native build stage
-COPY --from=builder /app/dist ./dist
+# Copy source code
+COPY tsconfig.json ./
+COPY src ./src
 
 EXPOSE 3000
 
 # Use Tini as the entrypoint to handle OS signals, and restrict V8 memory
 ENTRYPOINT ["/sbin/tini", "--"]
-CMD ["node", "--max-old-space-size=512", "dist/server.js"]
+CMD ["npx", "tsx", "src/server.ts"]
