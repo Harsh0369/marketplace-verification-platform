@@ -6,6 +6,7 @@ interface VerificationResultAttributes {
   productId: string;
   overallStatus: 'PASSED' | 'FAILED' | 'PENDING' | 'MANUAL_REVIEW';
   confidence: number;
+  reasons?: string[];
   verifiedAt?: Date;
   createdAt?: Date;
   updatedAt?: Date;
@@ -18,6 +19,7 @@ export class VerificationResult extends Model<VerificationResultAttributes, Veri
   public productId!: string;
   public overallStatus!: 'PASSED' | 'FAILED' | 'PENDING' | 'MANUAL_REVIEW';
   public confidence!: number;
+  public reasons?: string[];
   public verifiedAt?: Date;
 
   public readonly createdAt!: Date;
@@ -45,6 +47,11 @@ VerificationResult.init(
       type: DataTypes.FLOAT,
       allowNull: false,
       defaultValue: 0,
+    },
+    reasons: {
+      type: DataTypes.JSONB,
+      allowNull: true,
+      defaultValue: [],
     },
     verifiedAt: {
       type: DataTypes.DATE,

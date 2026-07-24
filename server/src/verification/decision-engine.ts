@@ -1,39 +1,42 @@
 import { AnalyzerResult } from './types';
-import { VerificationResult, VerificationLog } from '../db/models';
+import { VerificationResult } from '../db/models';
 
 export class DecisionEngine {
-  async processResults(productId: string, results: AnalyzerResult[]) {
-    const failures = results.filter(r => !r.passed);
-    const overallPassed = failures.length === 0;
+  /**
+   * Aggregates the results from all analyzers and generates the final decision.
+   * Creates a VerificationResult record in the database.
+   */
+  async evaluate(productId: string, results: AnalyzerResult[]) {
+    let overallStatus: 'PASSED' | 'FAILED' | 'PENDING' | 'MANUAL_REVIEW' = 'PASSED';
+    const reasons: string[] = [];
+    let confidence = 1.0;
 
-    let overallReason = 'Passed all verification checks.';
-    if (!overallPassed) {
-      overallReason = failures.map(f => `${f.moduleName}: ${f.reason}`).join(' | ');
+    for (const result of results) {
+      if (result.status === 'ERROR') {
+        // If an API went down or an error occurred, we flag for manual review,
+        // UNLESS the item was already FAILED by a deterministic rule.
+        if (overallStatus !== 'FAILED') {
+          overallStatus = 'MANUAL_REVIEW';
+          confidence = 0.5; // Uncertain due to error
+        }
+        reasons.push(`[${result.moduleName} Error]: ${result.reason}`);
+      } else if (result.status === 'FAILED') {
+        // A FAILED status immediately ruins the listing. It overrides MANUAL_REVIEW.
+        overallStatus = 'FAILED';
+        confidence = 0.0;
+        reasons.push(result.reason || 'Unknown failure reason');
+      }
     }
 
-    // Save to Database
+    // Save the final decision to the database
     const verificationRecord = await VerificationResult.create({
       productId,
-      overallStatus: overallPassed ? 'PASSED' : 'FAILED',
-      confidence: 1.0, // Base value for now
+      overallStatus,
+      confidence,
+      reasons,
+      verifiedAt: new Date()
     });
 
-    const logPromises = results.map(result => {
-      return VerificationLog.create({
-        verificationId: verificationRecord.id,
-        module: result.moduleName,
-        status: result.status,
-        confidence: result.confidence || 1.0,
-        reason: result.reason || 'OK'
-      });
-    });
-
-    await Promise.all(logPromises);
-
-    return {
-      passed: overallPassed,
-      reason: overallReason,
-      results
-    };
+    return verificationRecord;
   }
 }
