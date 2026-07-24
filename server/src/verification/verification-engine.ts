@@ -2,6 +2,7 @@ import { PipelineExecutor } from './pipeline-executor';
 import { DecisionEngine } from './decision-engine';
 import { VerificationContext } from './types';
 import { Product } from '../db/models';
+import { ImageIntegrityAnalyzer } from './analyzers/image-integrity.analyzer';
 
 export class VerificationEngine {
   private pipeline: PipelineExecutor;
@@ -11,7 +12,8 @@ export class VerificationEngine {
     this.pipeline = new PipelineExecutor();
     this.decisionEngine = new DecisionEngine();
     
-    // Phase 3-5 Analyzers will be registered here
+    // Register Analyzers
+    this.pipeline.registerAnalyzer(new ImageIntegrityAnalyzer());
   }
 
   async executeVerification(context: VerificationContext) {

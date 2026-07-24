@@ -1,6 +1,6 @@
 import { v2 as cloudinary, UploadApiResponse } from 'cloudinary';
 import { AppError } from '../utils/error.util';
-import streamifier from 'streamifier';
+import * as streamifier from 'streamifier';
 
 class CloudinaryProvider {
   constructor() {

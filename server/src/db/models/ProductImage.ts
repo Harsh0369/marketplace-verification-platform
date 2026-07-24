@@ -6,6 +6,7 @@ interface ProductImageAttributes {
   productId: string;
   imageUrl: string;
   thumbnailUrl?: string;
+  pHash?: string;
   createdAt?: Date;
   updatedAt?: Date;
 }
@@ -17,6 +18,7 @@ export class ProductImage extends Model<ProductImageAttributes, ProductImageCrea
   public productId!: string;
   public imageUrl!: string;
   public thumbnailUrl?: string;
+  public pHash?: string;
 
   public readonly createdAt!: Date;
   public readonly updatedAt!: Date;
@@ -39,6 +41,10 @@ ProductImage.init(
     },
     thumbnailUrl: {
       type: DataTypes.STRING,
+      allowNull: true,
+    },
+    pHash: {
+      type: DataTypes.STRING(64),
       allowNull: true,
     },
   },

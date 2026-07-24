@@ -1,5 +1,6 @@
 export interface VerificationContext {
   productId: string;
+  productImageId: string;
   userId: string;
   imageUrl: string;
   imageBuffer?: Buffer; 

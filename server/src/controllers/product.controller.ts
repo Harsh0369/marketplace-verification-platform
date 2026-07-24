@@ -98,6 +98,7 @@ export class ProductController {
       // Trigger Verification Engine
       const verificationDecision = await verificationEngine.executeVerification({
         productId: id,
+        productImageId: productImage.id,
         userId: userId,
         imageUrl,
         imageBuffer: file.buffer
