@@ -34,6 +34,8 @@ export class ProductService {
       title: input.title,
       description: input.description,
       category: input.category,
+      price: input.price,
+      condition: input.condition,
       userId,
       status: 'DRAFT', 
     });

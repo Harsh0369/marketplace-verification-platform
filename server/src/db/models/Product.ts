@@ -6,6 +6,8 @@ interface ProductAttributes {
   title: string;
   description: string;
   category: string;
+  price: number;
+  condition: string;
   status: 'DRAFT' | 'ACTIVE' | 'REJECTED' | 'NEEDS_REVIEW';
   userId: string;
   createdAt?: Date;
@@ -15,15 +17,17 @@ interface ProductAttributes {
 export interface ProductCreationAttributes extends Optional<ProductAttributes, 'id' | 'status'> {}
 
 export class Product extends Model<ProductAttributes, ProductCreationAttributes> implements ProductAttributes {
-  public id!: string;
-  public title!: string;
-  public description!: string;
-  public category!: string;
-  public status!: 'DRAFT' | 'ACTIVE' | 'REJECTED' | 'NEEDS_REVIEW';
-  public userId!: string;
+  declare id: string;
+  declare title: string;
+  declare description: string;
+  declare category: string;
+  declare price: number;
+  declare condition: string;
+  declare status: 'DRAFT' | 'ACTIVE' | 'REJECTED' | 'NEEDS_REVIEW';
+  declare userId: string;
 
-  public readonly createdAt!: Date;
-  public readonly updatedAt!: Date;
+  declare readonly createdAt: Date;
+  declare readonly updatedAt: Date;
 }
 
 Product.init(
@@ -42,6 +46,14 @@ Product.init(
       allowNull: false,
     },
     category: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    price: {
+      type: DataTypes.FLOAT,
+      allowNull: false,
+    },
+    condition: {
       type: DataTypes.STRING,
       allowNull: false,
     },

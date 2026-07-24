@@ -14,7 +14,7 @@ export class VisionProvider {
   async classifyImage(imageBuffer: Buffer): Promise<{ label: string; score: number }[]> {
     try {
       // Convert Buffer to Uint8Array to satisfy Blob constructor typings
-      const blob = new Blob([new Uint8Array(imageBuffer)]);
+      const blob = new Blob([new Uint8Array(imageBuffer)], { type: 'image/jpeg' });
 
       // We use a robust general-purpose Vision Transformer model
       const result = await this.hf.imageClassification({

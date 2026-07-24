@@ -11,7 +11,7 @@ class CloudinaryProvider {
     });
   }
 
-  async uploadImage(buffer: Buffer, folder: string = 'listingshield'): Promise<string> {
+  async uploadImage(imageBuffer: Buffer, folder: string = 'listingshield'): Promise<string> {
     return new Promise((resolve, reject) => {
       const uploadStream = cloudinary.uploader.upload_stream(
         { folder },
@@ -26,7 +26,7 @@ class CloudinaryProvider {
           resolve(result.secure_url);
         }
       );
-      streamifier.createReadStream(buffer).pipe(uploadStream);
+      streamifier.createReadStream(imageBuffer).pipe(uploadStream);
     });
   }
 }

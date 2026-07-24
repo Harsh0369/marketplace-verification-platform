@@ -14,14 +14,14 @@ interface ProductImageAttributes {
 export interface ProductImageCreationAttributes extends Optional<ProductImageAttributes, 'id'> {}
 
 export class ProductImage extends Model<ProductImageAttributes, ProductImageCreationAttributes> implements ProductImageAttributes {
-  public id!: string;
-  public productId!: string;
-  public imageUrl!: string;
-  public thumbnailUrl?: string;
-  public pHash?: string;
+  declare id: string;
+  declare productId: string;
+  declare imageUrl: string;
+  declare thumbnailUrl?: string;
+  declare pHash?: string;
 
-  public readonly createdAt!: Date;
-  public readonly updatedAt!: Date;
+  declare readonly createdAt: Date;
+  declare readonly updatedAt: Date;
 }
 
 ProductImage.init(

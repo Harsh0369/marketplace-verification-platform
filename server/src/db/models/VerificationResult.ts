@@ -13,17 +13,16 @@ interface VerificationResultAttributes {
 }
 
 export interface VerificationResultCreationAttributes extends Optional<VerificationResultAttributes, 'id' | 'verifiedAt'> {}
-
 export class VerificationResult extends Model<VerificationResultAttributes, VerificationResultCreationAttributes> implements VerificationResultAttributes {
-  public id!: string;
-  public productId!: string;
-  public overallStatus!: 'PASSED' | 'FAILED' | 'PENDING' | 'MANUAL_REVIEW';
-  public confidence!: number;
-  public reasons?: string[];
-  public verifiedAt?: Date;
+  declare id: string;
+  declare productId: string;
+  declare overallStatus: 'PASSED' | 'FAILED' | 'PENDING' | 'MANUAL_REVIEW';
+  declare confidence: number;
+  declare reasons?: string[];
+  declare verifiedAt?: Date;
 
-  public readonly createdAt!: Date;
-  public readonly updatedAt!: Date;
+  declare readonly createdAt: Date;
+  declare readonly updatedAt: Date;
 }
 
 VerificationResult.init(
