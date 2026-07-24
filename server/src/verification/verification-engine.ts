@@ -3,6 +3,8 @@ import { DecisionEngine } from './decision-engine';
 import { VerificationContext } from './types';
 import { Product } from '../db/models';
 import { ImageIntegrityAnalyzer } from './analyzers/image-integrity.analyzer';
+import { ContactDetectionAnalyzer } from './analyzers/contact-detection.analyzer';
+import { ProductClassificationAnalyzer } from './analyzers/product-classification.analyzer';
 
 export class VerificationEngine {
   private pipeline: PipelineExecutor;
@@ -14,6 +16,8 @@ export class VerificationEngine {
     
     // Register Analyzers
     this.pipeline.registerAnalyzer(new ImageIntegrityAnalyzer());
+    this.pipeline.registerAnalyzer(new ContactDetectionAnalyzer());
+    this.pipeline.registerAnalyzer(new ProductClassificationAnalyzer());
   }
 
   async executeVerification(context: VerificationContext) {
