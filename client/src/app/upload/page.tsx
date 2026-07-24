@@ -7,14 +7,15 @@ import { useRouter } from "next/navigation";
 import { UploadCloud, CheckCircle, AlertCircle, X, Image as ImageIcon } from "lucide-react";
 
 export default function UploadPage() {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, isLoading } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
+    if (isLoading) return;
     if (!isAuthenticated) {
       router.push("/login");
     }
-  }, [isAuthenticated, router]);
+  }, [isAuthenticated, isLoading, router]);
 
   const [formData, setFormData] = useState({
     title: "",
@@ -268,7 +269,7 @@ export default function UploadPage() {
               </div>
 
               <div className="space-y-2">
-                <label className="text-sm font-medium text-slate-700">Price ($)</label>
+                <label className="text-sm font-medium text-slate-700">Price (₹)</label>
                 <input
                   type="number"
                   name="price"

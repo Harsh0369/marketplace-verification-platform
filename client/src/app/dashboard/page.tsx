@@ -7,7 +7,7 @@ import { useRouter } from "next/navigation";
 import { Shield, ShieldAlert, Image as ImageIcon, Search, Filter, Loader2, ChevronDown, ChevronUp, AlertCircle } from "lucide-react";
 
 export default function DashboardPage() {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, isLoading } = useAuth();
   const router = useRouter();
   
   const [products, setProducts] = useState<any[]>([]);
@@ -15,6 +15,8 @@ export default function DashboardPage() {
   const [expandedId, setExpandedId] = useState<string | null>(null);
 
   useEffect(() => {
+    if (isLoading) return;
+    
     if (!isAuthenticated) {
       router.push("/login");
       return;
@@ -32,9 +34,9 @@ export default function DashboardPage() {
     };
 
     fetchProducts();
-  }, [isAuthenticated, router]);
+  }, [isAuthenticated, isLoading, router]);
 
-  if (!isAuthenticated) return null;
+  if (isLoading || !isAuthenticated) return null;
 
   return (
     <div className="max-w-7xl mx-auto">
@@ -137,7 +139,7 @@ export default function DashboardPage() {
                     <p className="text-slate-500 text-sm truncate mb-3">{product.description}</p>
                     
                     <div className="flex items-center gap-4 text-sm">
-                      <span className="font-semibold text-slate-700">${product.price}</span>
+                      <span className="font-semibold text-slate-700">₹{product.price}</span>
                       <span className="text-slate-300">•</span>
                       <span className="text-slate-600">{product.condition}</span>
                       <span className="text-slate-300">•</span>

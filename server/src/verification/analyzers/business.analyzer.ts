@@ -21,13 +21,24 @@ export class BusinessAnalyzer implements Analyzer {
       ];
       
       const foundSpam = spamKeywords.filter(keyword => textToAnalyze.includes(keyword));
+      
+      const phoneRegex = /(?:\+?\d{1,3}[\s-]?)?(?:\(?\d{2,4}\)?[\s-]?)?\d{3,4}[\s-]?\d{3,4}/g;
+      const emailRegex = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g;
+      
+      const hasPhone = phoneRegex.test(textToAnalyze);
+      const hasEmail = emailRegex.test(textToAnalyze);
 
-      if (foundSpam.length > 0) {
+      if (foundSpam.length > 0 || hasPhone || hasEmail) {
+        const violations = [];
+        if (foundSpam.length > 0) violations.push(`Prohibited keywords (${foundSpam.join(', ')})`);
+        if (hasPhone) violations.push('Phone number detected');
+        if (hasEmail) violations.push('Email detected');
+
         return {
           moduleName: this.name,
           passed: false,
           status: 'FAILED',
-          reason: `Policy violation: Prohibited keywords detected in listing (${foundSpam.join(', ')})`
+          reason: `Policy violation: ${violations.join('; ')}`
         };
       }
 

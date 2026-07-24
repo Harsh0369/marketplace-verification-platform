@@ -13,8 +13,16 @@ class CloudinaryProvider {
 
   async uploadImage(imageBuffer: Buffer, folder: string = 'listingshield'): Promise<string> {
     return new Promise((resolve, reject) => {
+      
+      const uploadOptions: any = { folder };
+      
+      // Only apply AI background removal in production to save Cloudinary credits
+      if (process.env.NODE_ENV === 'production') {
+        uploadOptions.background_removal = 'cloudinary_ai';
+      }
+
       const uploadStream = cloudinary.uploader.upload_stream(
-        { folder },
+        uploadOptions,
         (error, result: UploadApiResponse | undefined) => {
           if (error) {
             console.error('Cloudinary upload error:', error);

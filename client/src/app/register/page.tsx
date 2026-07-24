@@ -8,6 +8,7 @@ import Link from "next/link";
 import { ArrowRight, Mail, Lock } from "lucide-react";
 
 export default function RegisterPage() {
+  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -22,8 +23,8 @@ export default function RegisterPage() {
     setError("");
 
     try {
-      const response = await api.post("/auth/register", { email, password });
-      setToken(response.data.token);
+      const response = await api.post("/auth/register", { name, email, password });
+      setToken(response.data.data.token);
       router.push("/dashboard");
     } catch (err: any) {
       setError(err.response?.data?.message || "Registration failed");
@@ -52,6 +53,20 @@ export default function RegisterPage() {
           )}
 
           <form onSubmit={handleRegister} className="space-y-5">
+            <div className="space-y-1">
+              <label className="text-sm font-medium text-slate-700 ml-1">Name</label>
+              <div className="relative">
+                <input
+                  type="text"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  required
+                  className="block w-full px-3 py-2.5 border border-slate-200 rounded-xl text-sm shadow-sm placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-all bg-white/50 backdrop-blur-sm"
+                  placeholder="John Doe"
+                />
+              </div>
+            </div>
+
             <div className="space-y-1">
               <label className="text-sm font-medium text-slate-700 ml-1">Email</label>
               <div className="relative">

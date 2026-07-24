@@ -15,9 +15,10 @@ export class AppError extends Error {
 
 export const handleError = (res: Response, error: any) => {
   if (error instanceof ZodError) {
+    const message = error.issues.map(i => i.message).join(', ');
     return res.status(400).json({
       success: false,
-      message: 'Validation error',
+      message: message || 'Validation error',
       errors: error.issues,
     });
   }

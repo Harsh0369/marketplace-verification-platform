@@ -37,7 +37,36 @@ export class ProductClassificationAnalyzer implements Analyzer {
       // For this engine, we will require the AI to be at least mildly confident (10%)
       // that this is a recognized object rather than random noise or a blank background.
       
-      if (topPrediction.score < 0.1) {
+      const FASHION_KEYWORDS = [
+        'shirt', 'skirt', 'pant', 'jean', 'suit', 'coat', 'jacket', 'dress', 'gown',
+        'shoe', 'sneaker', 'boot', 'sandal', 'slipper', 'sock', 'hat', 'cap', 'beanie',
+        'glove', 'scarf', 'tie', 'belt', 'bag', 'purse', 'wallet', 'backpack',
+        'necklace', 'ring', 'bracelet', 'earring', 'watch', 'glass', 'sunglass',
+        'sweater', 'hoodie', 'cardigan', 'vest', 'bra', 'underwear', 'swim',
+        'bikini', 't-shirt', 'sweatshirt', 'cloak', 'abaya', 'jersey', 'poncho', 'bowtie',
+        'kimono', 'maillot', 'sarong', 'sombrero', 'bandanna', 'stole', 'apparel', 
+        'clothing', 'garment', 'attire', 'outfit', 'wear', 'accessories', 'fashion', 
+        'jewelry', 'footwear', 'headwear', 'activewear', 'perfume', 'fragrance',
+        'miniskirt', 'trench', 'sweatpants', 'leggings', 'blouse', 'tunic', 'tuxedo'
+      ];
+
+      // We strictly require that the #1 top prediction from the AI is a fashion item.
+      // This prevents logos/memes that happen to contain a minor fashion element (like sunglasses) from passing.
+      const isTopFashion = FASHION_KEYWORDS.some(keyword => 
+        topPrediction.label.toLowerCase().includes(keyword)
+      );
+
+      if (!isTopFashion) {
+         return {
+           moduleName: this.name,
+           passed: false,
+           status: 'FAILED',
+           reason: `Image does not appear to be a primary fashion product. AI classified it as: ${topPrediction.label}. We only accept images where clothing, footwear, or fashion accessories are the main subject.`,
+           metadata: { predictions: predictions.slice(0, 3) }
+         };
+      }
+
+      if (topPrediction.score < 0.15) {
          return {
            moduleName: this.name,
            passed: false,

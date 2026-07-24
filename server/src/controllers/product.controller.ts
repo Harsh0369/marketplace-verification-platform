@@ -5,6 +5,7 @@ import { cloudinaryProvider } from '../providers/cloudinary.provider';
 import { verificationEngine } from '../verification/verification-engine';
 import { sendSuccess } from '../utils/response.util';
 import { handleError, AppError } from '../utils/error.util';
+import sharp from 'sharp';
 
 export class ProductController {
   async getAllProducts(req: Request, res: Response) {
@@ -56,20 +57,29 @@ export class ProductController {
       const failureReasons: string[] = [];
 
       const imagePromises = files.map(async (file) => {
-        // Upload to Cloudinary
-        const imageUrl = await cloudinaryProvider.uploadImage(file.buffer);
-        
-        // Save to database
-        const productImage = await productService.addImageToProduct(product.id, imageUrl);
+        // Optimize the image before uploading to save massive network latency
+        const optimizedBuffer = await sharp(file.buffer)
+          .resize({ width: 1200, withoutEnlargement: true })
+          .jpeg({ quality: 85 })
+          .toBuffer();
 
-        // Trigger Verification Engine
-        const verificationDecision = await verificationEngine.executeVerification({
-          productId: product.id,
-          productImageId: productImage.id,
-          userId: userId,
-          imageUrl,
-          imageBuffer: file.buffer
-        });
+        // Pre-create the DB record so the Verification Engine has an ID to attach results to
+        const productImage = await productService.addImageToProduct(product.id, 'pending-upload');
+
+        // Run Cloudinary Upload and AI Verification CONCURRENTLY!
+        const [imageUrl, verificationDecision] = await Promise.all([
+          cloudinaryProvider.uploadImage(optimizedBuffer),
+          verificationEngine.executeVerification({
+            productId: product.id,
+            productImageId: productImage.id,
+            userId: userId,
+            imageUrl: 'pending-upload', // Handled locally via imageBuffer
+            imageBuffer: optimizedBuffer
+          })
+        ]);
+        
+        // Update DB with the real URL now that upload is complete
+        await productImage.update({ imageUrl });
 
         return verificationDecision;
       });

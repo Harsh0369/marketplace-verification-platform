@@ -8,6 +8,7 @@ interface AuthContextType {
   setToken: (token: string | null) => void;
   logout: () => void;
   isAuthenticated: boolean;
+  isLoading: boolean;
 }
 
 const AuthContext = createContext<AuthContextType>({
@@ -15,10 +16,12 @@ const AuthContext = createContext<AuthContextType>({
   setToken: () => {},
   logout: () => {},
   isAuthenticated: false,
+  isLoading: true,
 });
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [token, setTokenState] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
 
   useEffect(() => {
@@ -27,6 +30,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     if (storedToken) {
       setTokenState(storedToken);
     }
+    setIsLoading(false);
   }, []);
 
   const setToken = (newToken: string | null) => {
@@ -50,6 +54,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         setToken,
         logout,
         isAuthenticated: !!token,
+        isLoading,
       }}
     >
       {children}

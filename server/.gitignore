@@ -3,3 +3,7 @@ node_modules
 .env
 
 /src/generated/prisma
+
+# Tesseract OCR language models
+*.traineddata
+*.traineddata.gz

@@ -9,7 +9,11 @@ export class ProductService {
       offset,
       include: [
         { model: ProductImage, as: 'images' },
-        { model: VerificationResult, as: 'verificationResult' }
+        { 
+          model: VerificationResult, 
+          as: 'verificationResult',
+          attributes: { exclude: ['metadata'] } // Exclude heavy JSON payloads for list views
+        }
       ],
       order: [['createdAt', 'DESC']]
     });

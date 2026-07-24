@@ -2,6 +2,7 @@ import express, { Request, Response, NextFunction } from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import dotenv from 'dotenv';
+import morgan from 'morgan';
 
 dotenv.config();
 
@@ -10,6 +11,7 @@ const app = express();
 // Middleware
 app.use(helmet());
 app.use(cors());
+app.use(morgan('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -17,8 +19,8 @@ import productRoutes from './routes/product.routes';
 import authRoutes from './routes/auth.routes';
 
 // Routes
-app.use('/auth', authRoutes);
-app.use('/products', productRoutes);
+app.use('/api/auth', authRoutes);
+app.use('/api/products', productRoutes);
 
 // Health Check
 app.get('/health', (req: Request, res: Response) => {
