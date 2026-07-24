@@ -29,8 +29,11 @@ export class ContactDetectionAnalyzer implements Analyzer {
       }
 
       // Regex patterns to detect prohibited contact info
-      // Phone: Matches various formats like +1 555-555-5555, (555) 555-5555
-      const phoneRegex = /(?:\+?\d{1,3}[\s-]?)?(?:\(?\d{2,4}\)?[\s-]?)?\d{3,4}[\s-]?\d{3,4}/g;
+      // Phone: Matches various formats, allowing for extra spaces often introduced by OCR
+      const phoneRegex = /(?:\+?\d{1,3}[\s-]*)?(?:\(?\d{2,4}\)?[\s-]*)?\d{3,4}[\s-]*\d{3,4}(?:[\s-]*\d{1,4})?/g;
+      
+      // Secondary check: look for 10 digits in close proximity even with OCR artifacts mixed in (e.g., spaces, letter 'O')
+      const denseDigitsRegex = /(?:\d[^\d]{0,2}){10,}/;
       
       // Email: Standard email validation
       const emailRegex = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g;
@@ -40,7 +43,7 @@ export class ContactDetectionAnalyzer implements Analyzer {
 
       // Ensure we don't accidentally match on standard sizes or codes as phones
       // But for this strict MVP, we will flag it if it heavily resembles contact info
-      const hasPhone = phoneRegex.test(extractedText);
+      const hasPhone = phoneRegex.test(extractedText) || denseDigitsRegex.test(extractedText);
       const hasEmail = emailRegex.test(extractedText);
       const hasSocial = socialRegex.test(extractedText);
 

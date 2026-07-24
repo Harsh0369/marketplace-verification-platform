@@ -27,6 +27,10 @@ app.get('/health', (req: Request, res: Response) => {
   res.status(200).json({ success: true, message: 'ListingShield API is healthy' });
 });
 
+app.get('/', (req: Request, res: Response) => {
+  res.status(200).send('<h1>ListingShield API is running! 🚀</h1>');
+});
+
 import { handleError } from './utils/error.util';
 
 // Basic Error Handler

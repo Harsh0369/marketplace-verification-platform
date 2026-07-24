@@ -1,0 +1,39 @@
+name: Deploy Marketplace Backend
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  id-token: write
+  contents: read
+
+env:
+  ACR_NAME: marketplaceregistryharsh # We will create this in the next step
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Azure Login
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Login to ACR
+        run: az acr login --name ${{ env.ACR_NAME }}
+
+      - name: Build and Push Docker Image
+        run: |
+          docker build --platform linux/amd64 -t ${{ env.ACR_NAME }}.azurecr.io/backend:${{ github.sha }} ./server
+          docker push ${{ env.ACR_NAME }}.azurecr.io/backend:${{ github.sha }}
+
+      - name: Trigger Azure Run Command (Deploy)
+        run: |
+          az vm run-command invoke \
+            --resource-group ListingShield \
+            --name ListingShield \
+            --command-id RunShellScript \
+            --scripts "bash /opt/marketplace/deploy.sh ${{ env.ACR_NAME }} ${{ github.sha }}"
