@@ -34,12 +34,66 @@ export class ProductController {
 
   async createProduct(req: Request, res: Response) {
     try {
+      // Parse price from string to number if it comes from FormData
+      if (req.body.price && typeof req.body.price === 'string') {
+        req.body.price = parseFloat(req.body.price);
+      }
+
       const validatedData = createProductSchema.parse(req.body);
       // @ts-ignore - req.user injected by requireAuth middleware
       const userId = req.user.userId;
+
+      const files = req.files as Express.Multer.File[];
+      if (!files || files.length === 0) {
+        throw new AppError('At least 1 image is required', 400);
+      }
       
+      // Create product as DRAFT initially
       const product = await productService.createProduct(userId, validatedData);
-      return sendSuccess(res, 201, 'Product created', product);
+      
+      // Upload and verify all images concurrently
+      let allPassed = true;
+      const failureReasons: string[] = [];
+
+      const imagePromises = files.map(async (file) => {
+        // Upload to Cloudinary
+        const imageUrl = await cloudinaryProvider.uploadImage(file.buffer);
+        
+        // Save to database
+        const productImage = await productService.addImageToProduct(product.id, imageUrl);
+
+        // Trigger Verification Engine
+        const verificationDecision = await verificationEngine.executeVerification({
+          productId: product.id,
+          productImageId: productImage.id,
+          userId: userId,
+          imageUrl,
+          imageBuffer: file.buffer
+        });
+
+        return verificationDecision;
+      });
+
+      const verificationResults = await Promise.all(imagePromises);
+
+      for (const decision of verificationResults) {
+        if (decision.overallStatus === 'FAILED') {
+          allPassed = false;
+          failureReasons.push(...(decision.reasons || []));
+        }
+      }
+
+      if (!allPassed) {
+        // Rollback: delete the product if verification fails
+        await productService.deleteProduct(product.id, userId);
+        throw new AppError(`Submission rejected: ${failureReasons.join(', ')}`, 400);
+      }
+
+      // If all passed, we could update status to PUBLISHED, but keeping DRAFT/ACTIVE is fine.
+      // Let's refetch product to include the results
+      const finalProduct = await productService.getProductById(product.id);
+
+      return sendSuccess(res, 201, 'Product created and verified successfully', finalProduct);
     } catch (error: any) {
       return handleError(res, error);
     }

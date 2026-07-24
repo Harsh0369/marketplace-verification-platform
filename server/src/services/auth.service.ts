@@ -35,7 +35,7 @@ export class AuthService {
       throw new Error('Invalid email or password');
     }
 
-    const isMatch = await bcrypt.compare(input.password, user.password);
+    const isMatch = await bcrypt.compare(input.password, user.password || '');
     if (!isMatch) {
       throw new Error('Invalid email or password');
     }
